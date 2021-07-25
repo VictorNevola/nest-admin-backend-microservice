@@ -19,8 +19,6 @@ export class AppController {
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
 
-    this.logger.log(`categoria: ${JSON.stringify(categoria)}`);
-
     try {
       await this.appService.criarCategoria(categoria);
       await channel.ack(originalMsg);
@@ -39,13 +37,41 @@ export class AppController {
 
   @MessagePattern('consultar-categorias')
   async consultarCategorias(
-    @Payload() _id: string
+    @Payload() _id: string,
+    @Ctx() context: RmqContext
   ) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
 
-    if (_id) {
-      return await this.appService.consultarCategoriaPeloId(_id)
+    try {
+      if (_id) {
+        return await this.appService.consultarCategoriaPeloId(_id)
+      }
+
+      return await this.appService.consultarCategorias();
+
+    } finally {
+      await channel.ack(originalMsg)
     }
 
-    return await this.appService.consultarCategorias();
+  }
+
+  @EventPattern('atualizar-categoria')
+  async atualizarCategoria(
+    @Payload() data: any, @Ctx() context: RmqContext
+  ){
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+
+    try{
+      const { idCategoria, categoriaAtualizada } = data;
+
+      await this.appService.atualizarCategoria(idCategoria, categoriaAtualizada)
+      await channel.ack(originalMsg);
+
+    } catch(error) {
+
+    }
+
   }
 }

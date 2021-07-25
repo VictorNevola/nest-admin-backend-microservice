@@ -39,6 +39,18 @@ export class AppService {
     return categoriaEncontrada;
   }
 
+  async atualizarCategoria(_id: string, categoria: categoria): Promise<void> {
+    const categoriaEncontrada = await this.categoriaModel.findById(_id);
+
+    if (!categoriaEncontrada) {
+        throw new RpcException(`Categoria ${categoria} não encontrada`);
+    }
+
+    await this.categoriaModel.findByIdAndUpdate(_id, { $set: categoria });
+
+  }
+
+
   private async procuraCategoriaPeloNome(categoria: string): Promise<categoria> {
     return await this.categoriaModel.findOne({ categoria }).exec();
   }
