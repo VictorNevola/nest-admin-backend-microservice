@@ -25,4 +25,22 @@ export class AppService {
     }
   }
 
+  async consultarCategorias(): Promise<Array<categoria>> {
+    return await this.categoriaModel.find().populate("jogadores").exec();
+  }
+
+  async consultarCategoriaPeloId(categoria: string): Promise<categoria> {
+    const categoriaEncontrada = await this.procuraCategoriaPeloNome(categoria);
+
+    if (!categoriaEncontrada) {
+      throw new RpcException(`Categoria ${categoria} não encontrada`);
+    }
+
+    return categoriaEncontrada;
+  }
+
+  private async procuraCategoriaPeloNome(categoria: string): Promise<categoria> {
+    return await this.categoriaModel.findOne({ categoria }).exec();
+  }
+
 }
